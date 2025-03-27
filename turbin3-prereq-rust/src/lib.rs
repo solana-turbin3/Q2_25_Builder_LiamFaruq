@@ -14,7 +14,7 @@ mod tests {
     use solana_sdk::{
         signature::{read_keypair_file}, transaction::Transaction};    use solana_program::{pubkey::Pubkey,system_instruction::transfer};
     use std::str::FromStr;
-    use crate::programs::Turbin3_prereq::{Turbin3PrereqProgram, CompleteArgs};
+    use crate::programs::Turbine_prereq::{ TurbinePrereqProgram, CompleteArgs};
 
     const RPC_URL: &str = "https://api.devnet.solana.com";
 
@@ -164,29 +164,61 @@ mod tests {
 
         #[test]
         fn enroll() {
-            let rpc_client: RpcClient = RpcClient::new(RPC_URL);
-
+            let rpc_client: RpcClient = RpcClient::new("https://api.devnet.solana.com");
+        
+            let signer: Keypair = read_keypair_file("Turbin3-wallet.json")
+                .expect("Couldn't find wallet file");
+            
+            // args for the instruction
             let args = CompleteArgs { github: b"SwineCoder101".to_vec() };
-            let system_account = Pubkey::from_str("11111111111111111111111111111111").unwrap();
-            let signer = read_keypair_file("Turbin3-wallet.json").expect("Couldn't find wallet file");
+        
+            // Derive the PDA correctly
+            // let prereq_pda = TurbinePrereqProgram::derive_program_address(&[
+            //     b"prereq",
+            //     signer.pubkey().as_ref(),
+            // ]);
 
-            let prereq = Turbin3PrereqProgram::derive_program_address(&[b"preQ225", signer.pubkey().to_bytes().as_ref()]);
+            let prereq_pda = TurbinePrereqProgram::derive_program_address(&[b"preQ225",
+            signer.pubkey().to_bytes().as_ref()]);
+        
+            // System program account
+            let system_program = Pubkey::from_str("11111111111111111111111111111111").unwrap();
+        
+            // Get recent blockhash
+            let blockhash = rpc_client.get_latest_blockhash()
+                .expect("Failed to get recent blockhash");
+    
 
-            let blockhash = rpc_client .get_latest_blockhash() .expect("Failed to get recent
-            blockhash");
-
-            let transaction = Transaction::new_signed_with_payer(
-                &[Turbin3PrereqProgram::complete(args, prereq, system_account)],
+            // Correctly list accounts in order as per your instruction:
+            // [signer, prereq PDA, system_program]
+            let accounts = [
+                &signer.pubkey(),
+                &prereq_pda,
+                &system_program,
+            ];
+        
+            // Construct the instruction correctly:
+            let transaction = TurbinePrereqProgram::complete(
+                &accounts,
+                &args,
                 Some(&signer.pubkey()),
-                &vec![&signer],
-                blockhash
+                &[&signer],
+                blockhash,
             );
-
-            let signature = rpc_client .send_and_confirm_transaction(&transaction) .expect("Failed
-            to send transaction");
-
-            println!("Success! Check out your TX here: https://explorer.solana.com/tx/{}/?cluster=devnet",signature);
-
+        
+            // Create and sign the transaction correctly
+            // let transaction = Transaction::new_signed_with_payer(
+            //     &[instruction],
+            //     Some(&signer.pubkey()),
+            //     &[&signer],
+            //     blockhash
+            // );
+        
+            // Send the transaction
+            let signature = rpc_client.send_and_confirm_transaction(&transaction)
+                .expect("Failed to send transaction");
+        
+            println!("Success! Check out your TX here: https://explorer.solana.com/tx/{}/?cluster=devnet", signature);
         }
             
 
