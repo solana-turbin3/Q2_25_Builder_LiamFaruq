@@ -12,7 +12,7 @@ function displayMenu() {
     console.log("3. Convert base58 to keypair JSON");
     console.log("4. View dev wallet");
     console.log("5. View Turbin3 wallet");
-    console.log("6. Create Keypair from Binary")
+    console.log("6. Create Keypair from Binary");
     console.log("7. Exit");
     return input("Select an option (1-5): ");
 }
@@ -40,7 +40,7 @@ function generateNewKeypair() {
         publicKey: kp.publicKey.toBase58()
     }
     
-    fs.writeFileSync('./dev-wallet.json', JSON.stringify(walletFile, null, 2))
+    fs.writeFileSync('./dev-wallet-new.json', JSON.stringify(walletFile, null, 2))
     console.log(`\nNew Solana wallet generated!`)
     console.log(`Public Key: ${kp.publicKey.toBase58()}`)
     console.log(`Wallet saved to ./dev-wallet.json`)

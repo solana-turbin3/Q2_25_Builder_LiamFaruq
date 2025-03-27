@@ -5,7 +5,8 @@
     "keygen": "ts-node ./keygen.ts",
     "airdrop": "ts-node ./airdrop.ts",
     "transfer": "ts-node ./transfer.ts",
-    "enroll": "ts-node ./enroll.ts"
+    "enroll": "ts-node ./enroll.ts",
+    "indexer": "ts-node ./indexer.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.0",
