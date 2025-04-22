@@ -1,4 +1,0 @@
-[submodule "vault-anchor"]
-	path = vault-anchor
-	url = https://github.com/solana-turbin3/Q2_25_Builder_LiamFaruq.git
-	branch = main
