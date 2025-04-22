@@ -2,3 +2,31 @@
 	path = vault-anchor
 	url = https://github.com/solana-turbin3/Q2_25_Builder_LiamFaruq.git
 	branch = main
+[submodule "amm"]
+	path = amm
+	url = https://github.com/solana-turbin3/Q2_25_Builder_LiamFaruq.git
+	branch = main
+[submodule "escrow"]
+	path = escrow
+	url = https://github.com/solana-turbin3/Q2_25_Builder_LiamFaruq.git
+	branch = main
+[submodule "escrow-v2"]
+	path = escrow-v2
+	url = https://github.com/solana-turbin3/Q2_25_Builder_LiamFaruq.git
+	branch = main
+[submodule "experiment"]
+	path = experiment
+	url = https://github.com/solana-turbin3/Q2_25_Builder_LiamFaruq.git
+	branch = main
+[submodule "marketplace"]
+	path = marketplace
+	url = https://github.com/solana-turbin3/Q2_25_Builder_LiamFaruq.git
+	branch = main
+[submodule "solana-starter"]
+	path = solana-starter
+	url = https://github.com/solana-turbin3/Q2_25_Builder_LiamFaruq.git
+	branch = main
+[submodule "staking"]
+	path = staking
+	url = https://github.com/solana-turbin3/Q2_25_Builder_LiamFaruq.git
+	branch = main
