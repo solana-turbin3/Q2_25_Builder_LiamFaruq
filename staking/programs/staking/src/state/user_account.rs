@@ -2,4 +2,6 @@
 
 #[account]
 #[derive(InitSpace)]
-pub struct 
+pub struct {
+    
+}

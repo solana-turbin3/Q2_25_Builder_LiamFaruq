@@ -39,7 +39,7 @@ impl<'info> InitializeConfig<'info> {
             max_stake,
             freeze_period,
             re
-        })
+        });
         Ok(())
     }
 }
