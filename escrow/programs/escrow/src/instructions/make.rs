@@ -62,7 +62,7 @@ impl<'info> Make<'info> {
             maker: self.maker.key(),
             mint_a: self.mint_a.key(),
             mint_b: self.mint_b.key(),
-            recieve,
+            receive_amount: recieve,
             bump: bumps.escrow,
         });
         Ok(())
@@ -79,6 +79,20 @@ impl<'info> Make<'info> {
         let cpi_ctx = CpiContext::new(cpi_program, transfer_accounts);
 
         transfer_checked(cpi_ctx, deposit, self.mint_a.decimals)
+    }
+
+    pub fn withdraw(&mut self, amount: u64) -> Result<()> {
+        let cpi_program = self.token_program.to_account_info();
+
+        let transfer_accounts = TransferChecked {
+            from: self.vault.to_account_info(),
+            mint: self.mint_a.to_account_info(),
+            to: self.maker_ata_a.to_account_info(),
+            authority: self.escrow.to_account_info(),
+        };
+
+        let cpi_ctx = CpiContext::new(cpi_program, transfer_accounts);
+        transfer_checked(cpi_ctx, amount, self.mint_a.decimals)
     }
 }
 

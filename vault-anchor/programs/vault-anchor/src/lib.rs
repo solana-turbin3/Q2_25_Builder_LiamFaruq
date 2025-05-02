@@ -1,5 +1,4 @@
 
-// #[] allow for warnings
 #![allow(unexpected_cfgs)]
 use anchor_lang::{prelude::*, system_program::{transfer, Transfer}};
 
@@ -137,7 +136,7 @@ pub struct Initialize <'info>{
     pub vault_state: Account<'info, VaultState>,
 
     #[account(
-        seeds = [b"vault", vault_state.key().as_ref()], 
+        seeds = [b"vault", user.key().as_ref()], 
         bump
     )]
     pub vault: SystemAccount<'info>,
