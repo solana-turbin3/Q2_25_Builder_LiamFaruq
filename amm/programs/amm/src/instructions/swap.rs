@@ -13,6 +13,7 @@ pub struct Swap<'info> {
     pub user: Signer<'info>,
     pub mint_x: Account<'info, Mint>,
     pub mint_y: Account<'info, Mint>,
+
     #[account(
         seeds = [b"lp",config.key().as_ref()],
         bump = config.lp_bump,
@@ -20,6 +21,7 @@ pub struct Swap<'info> {
         mint::authority = config,
     )]
     pub mint_lp: Account<'info, Mint>,
+    
     #[account(
     init_if_needed,
     payer = user,
@@ -27,6 +29,7 @@ pub struct Swap<'info> {
     associated_token::authority = user,
     )]
     pub user_x: Account<'info, TokenAccount>,
+    
     #[account(
     init_if_needed,
     payer = user,

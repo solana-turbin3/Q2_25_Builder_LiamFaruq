@@ -1,9 +1,12 @@
 use anchor_lang::prelude::*;
 
-use anchor_spl::{associated_token::*, token::Token, token_interface::{Mint, TokenAccount}};
-
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{Mint, Token, TokenAccount},
+};
 
 use crate::state::Config;
+
 
 
 #[derive(Accounts)]
