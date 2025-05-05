@@ -7,6 +7,8 @@ import {
   DriftClient,
   OrderType,
   PositionDirection,
+  SpotMarkets,
+  TokenFaucet,
 } from '@drift-labs/sdk';
 
 // ---------- helper to load the keypair ----------
@@ -35,29 +37,43 @@ async function main() {
     accountSubscription: { type: 'websocket' },
   });
 
-  await driftClient.subscribe();          // loads markets, user account, etc.
+  const mintPubkey = SpotMarkets["devnet"][0].mint
 
-  /*** 3. OPEN position – market order via `placeAndTakePerpOrder` ***/
-  const SOL_PERP_INDEX = 0;               // SOL‑PERP is index 0 on Drift
-  const baseAmount     = new BN(0.1 * 1e9);   // 0.1 SOL in base precision
+  const faucet = new TokenFaucet(
+    connection,
+    wallet,
+    mintPubkey,
+    driftProgramId)
 
-  const openSig = await driftClient.placeAndTakePerpOrder({
-    marketIndex: SOL_PERP_INDEX,
-    direction:   PositionDirection.LONG,
-    baseAssetAmount: baseAmount,
-    orderType: OrderType.MARKET,
-    reduceOnly: false,
-  });
-  console.log(`Opened 0.1 SOL‑PERP long → tx ${openSig}`);
+    faucet.mintToUser()
 
-  /*** 4. wait a few blocks (simple demo‑delay) ***/
-  await new Promise((r) => setTimeout(r, 6000));
+  // await driftClient.subscribe();    
+  //       // loads markets, user account, etc.
 
-  /*** 5. CLOSE position – convenient helper (market order in opposite dir.) ***/
-  const closeSig = await driftClient.closePosition(SOL_PERP_INDEX);
-  console.log(`Closed position          → tx ${closeSig}`);
+  // const marketIndex = await driftClient.getPerpMarketAccounts();
+  // console.log(marketIndex);
 
-  await driftClient.unsubscribe();
+  // /*** 3. OPEN position – market order via `placeAndTakePerpOrder` ***/
+  // const SOL_PERP_INDEX = 0;               // SOL‑PERP is index 0 on Drift
+  // const baseAmount     = new BN(0.1 * 1e9);   // 0.1 SOL in base precision
+
+  // const openSig = await driftClient.placeAndTakePerpOrder({
+  //   marketIndex: SOL_PERP_INDEX,
+  //   direction:   PositionDirection.LONG,
+  //   baseAssetAmount: baseAmount,
+  //   orderType: OrderType.MARKET,
+  //   reduceOnly: false,
+  // });
+  // console.log(`Opened 0.1 SOL‑PERP long → tx ${openSig}`);
+
+  // /*** 4. wait a few blocks (simple demo‑delay) ***/
+  // await new Promise((r) => setTimeout(r, 6000));
+
+  // /*** 5. CLOSE position – convenient helper (market order in opposite dir.) ***/
+  // const closeSig = await driftClient.closePosition(SOL_PERP_INDEX);
+  // console.log(`Closed position          → tx ${closeSig}`);
+
+  // await driftClient.unsubscribe();
 }
 
 main().catch((e) => {

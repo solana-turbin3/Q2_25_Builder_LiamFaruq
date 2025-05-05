@@ -1,13 +1,15 @@
-import { AnchorProvider, BN, Program, Wallet } from "@coral-xyz/anchor";
-import { IDL, type Perpetuals } from "./idl/jupiter-perpetuals-idl";
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import { AnchorProvider, Program, Wallet } from "@coral-xyz/anchor";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { IDL, type Perpetuals } from "../idl/jupiter-perpetuals-idl.ts";
+import { connection } from "./utils.ts";
+import { BN } from "bn.js";
 
-export const RPC_CONNECTION = new Connection(
-  process.env.RPC_URL || "https://api.mainnet-beta.solana.com",
-);
 
+
+
+export const RPC_CONNECTION = connection;
 export const JUPITER_PERPETUALS_PROGRAM_ID = new PublicKey(
-  "PERPHjGBqRHArX4DySjwM6UJHiR3sWAatqfdBS2qQJu",
+  "PERPHjGBqRHArX4DySjwM6UJHiR3sWAatqfdBS2qQJu",  
 );
 
 export const JUPITER_PERPETUALS_EVENT_AUTHORITY_PUBKEY = new PublicKey(

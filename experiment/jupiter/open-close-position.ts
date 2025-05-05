@@ -7,23 +7,10 @@
  *  ts-node jupiter-perps.ts
  */
 
-import "dotenv/config";
 import {
   AnchorProvider,
-  BN,
-  Program,
-  Wallet,
+  Wallet
 } from "@coral-xyz/anchor";
-import {
-  Blockhash,
-  ComputeBudgetProgram,
-  Connection,
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  TransactionMessage,
-  VersionedTransaction,
-} from "@solana/web3.js";
 import {
   createAssociatedTokenAccountIdempotentInstruction,
   createCloseAccountInstruction,
@@ -31,19 +18,22 @@ import {
   getAssociatedTokenAddressSync,
   NATIVE_MINT,
 } from "@solana/spl-token";
-import axios from "axios";
-
+import {
+  ComputeBudgetProgram,
+  PublicKey,
+  SystemProgram,
+  TransactionMessage,
+  VersionedTransaction
+} from "@solana/web3.js";
+import "dotenv/config";
+import { JUPITER_PERPETUALS_PROGRAM } from "./constants.ts";
+import { connection, loadKeypair } from "./utils.ts";
+import { BN } from "bn.js";
 // ─────────────────────────────────────────────────────────────────────────
-//  CONSTANTS  (copied from the official example repo)                     ─
-const RPC = new Connection(
-  process.env.RPC_URL ?? "https://api.mainnet-beta.solana.com"
-);
 
-// your local keypair
-const WALLET = Keypair.fromSecretKey(
-  Uint8Array.from(JSON.parse(process.env.PRIVATE_KEY!))
-);
-const PROVIDER = new AnchorProvider(RPC, new Wallet(WALLET), {
+
+const keypair = loadKeypair();
+const PROVIDER = new AnchorProvider(connection, new Wallet(keypair), {
   commitment: "confirmed",
 });
 
@@ -54,11 +44,9 @@ const POOL_ID  = new PublicKey("5BUwFW4nRbftYTDMbgxykoFWqWHPzahFSNAaaaJtVKsq");
 // Custodies (SOL only here – add the rest if you want)
 const SOL_CUSTODY = new PublicKey("7xS2gz2bTp3fwCC7knJvUWTEU9Tycczu6VhJYKgi1wdz");
 
-// Import the IDL JSON (put it next to this file)
-import IDL_JSON from "./jupiter-perpetuals-idl.json";
-type Perpetuals = typeof IDL_JSON;
 
-const PROGRAM = new Program<Perpetuals>(IDL_JSON as any, PERPS_ID, PROVIDER);
+
+const PROGRAM = JUPITER_PERPETUALS_PROGRAM;
 
 // ─────────────────────────────────────────────────────────────────────────
 //  PDA helpers (unchanged from example repo)                              ─
@@ -86,7 +74,7 @@ export async function openPerpPosition(params: {
   side: "long" | "short";
   sizeUsd: number;             // e.g. 100  ==  $100 notional
   collateralSol: number;       // lamports of SOL to post
-  maxPriceSlippagePct?: number // default 1 %
+  maxPriceSlippagePct?: number // default 1 %
 }) {
   const {
     side,
@@ -96,9 +84,9 @@ export async function openPerpPosition(params: {
   } = params;
 
   // basic inputs
-  const owner          = WALLET.publicKey;
+  const owner          = keypair.publicKey;
   const counter        = Math.floor(Math.random() * 1e6);
-  const sizeUsdDelta   = new BN(sizeUsd * 1e6);            // USDC 6 decimals
+  const sizeUsdDelta   = new BN(sizeUsd * 1e6);            // USDC 6 decimals
   const collateralDelta= new BN(collateralSol);
 
   // derive PDAs
@@ -112,11 +100,11 @@ export async function openPerpPosition(params: {
     true
   );
 
-  // Quoting – only needed when the trade requires a swap (SOL→SOL doesn’t),
+  // Quoting – only needed when the trade requires a swap (SOL→SOL doesn't),
   // but I include the pattern for completeness.
   const jupiterMinimumOut = null; // leave null for native SOL longs
 
-  // Slippage in quote units (USDC 6dp)
+  // Slippage in quote units (USDC 6dp)
   const priceSlippage = new BN(
     (maxPriceSlippagePct / 100) * 1e6 * 1 // $1 in quote units
   );
@@ -137,10 +125,9 @@ export async function openPerpPosition(params: {
     }),
     createSyncNativeInstruction(fundingAccount),
   ];
-
   const increaseIx = await PROGRAM.methods
     .createIncreasePositionMarketRequest({
-      counter,
+      counter: new BN(counter),
       collateralTokenDelta: collateralDelta,
       jupiterMinimumOut,
       priceSlippage,
@@ -167,14 +154,14 @@ export async function openPerpPosition(params: {
     .instruction();
 
   // compute budget – sim first to size it correctly
-  const recentBlockhash = (await RPC.getLatestBlockhash()).blockhash;
+  const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
   const simMessage = new TransactionMessage({
     payerKey: owner,
     recentBlockhash,
     instructions: preIxs.concat(increaseIx),
   }).compileToV0Message();
   const simTx = new VersionedTransaction(simMessage);
-  const sim   = await RPC.simulateTransaction(simTx, {
+  const sim   = await connection.simulateTransaction(simTx, {
     replaceRecentBlockhash: true,
     sigVerify: false,
   });
@@ -195,8 +182,8 @@ export async function openPerpPosition(params: {
   }).compileToV0Message();
 
   const tx = new VersionedTransaction(txMsg);
-  tx.sign([WALLET]);
-  const sig = await RPC.sendTransaction(tx, {
+  tx.sign([keypair]);
+  const sig = await connection.sendTransaction(tx, {
     skipPreflight: true,
   });
   console.log("📤  open request sent:", sig);
@@ -216,14 +203,13 @@ export async function closePerpPosition(positionPda: PublicKey) {
     position.owner,
     true
   );
-
   const decIx = await PROGRAM.methods
     .createDecreasePositionMarketRequest({
       collateralUsdDelta: new BN(0),
       sizeUsdDelta:       new BN(0),
       priceSlippage:      new BN(100_000_000_000), // generous
       jupiterMinimumOut:  null,
-      counter,
+      counter: new BN(counter),
       entirePosition:     true,
     })
     .accounts({
@@ -248,7 +234,7 @@ export async function closePerpPosition(positionPda: PublicKey) {
     })
     .instruction();
 
-  const bh  = (await RPC.getLatestBlockhash()).blockhash;
+  const bh  = (await connection.getLatestBlockhash()).blockhash;
   const msg = new TransactionMessage({
     payerKey: position.owner,
     recentBlockhash: bh,
@@ -259,23 +245,33 @@ export async function closePerpPosition(positionPda: PublicKey) {
     ],
   }).compileToV0Message();
   const tx = new VersionedTransaction(msg);
-  tx.sign([WALLET]);
+  tx.sign([keypair]);
 
-  const sig = await RPC.sendTransaction(tx, { skipPreflight: true });
+  const sig = await connection.sendTransaction(tx, { skipPreflight: true });
   console.log("📤  close request sent:", sig);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-//  DEMO – open 0.1 SOL long worth $100, then close it                     ─
+//  DEMO – open 0.1 SOL long worth $100, then close it                     ─
 (async () => {
-  await openPerpPosition({
+
+  const keypair = loadKeypair();
+
+  console.log("using wallet: ", keypair.publicKey.toBase58());
+
+  console.log("Opening position...");
+  
+  const sig = await openPerpPosition({
     side: "long",
     sizeUsd: 100,
     collateralSol: 0.1 * 1e9, // lamports
   });
 
+  console.log("Position opened with signature: ", sig);
+  
+  console.log("Closing position...");
   // wait a few seconds then close the exact same position
   // (you'd normally fetch the PDA list first)
-  const posPda = generatePositionPda(WALLET.publicKey, SOL_CUSTODY);
+  const posPda = generatePositionPda(keypair.publicKey, SOL_CUSTODY);
   await closePerpPosition(posPda);
 })();
