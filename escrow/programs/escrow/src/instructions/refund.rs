@@ -4,7 +4,6 @@ use anchor_spl::{associated_token::*, token_interface::{TokenAccount,Mint,TokenI
 
 use crate::state::Escrow;
 
-
 #[derive(Accounts)]
 #[instruction(seed: u64)]
 pub struct Refund<'info> {
