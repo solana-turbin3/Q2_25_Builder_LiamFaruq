@@ -17,7 +17,7 @@ export const MAINNET_RPC_URL = "https://api.mainnet-beta.solana.com";
 export const DEVNET_RPC_URL = "https://api.devnet.solana.com";
 export const LOCALNET_RPC_URL = "http://127.0.0.1:8899";
 
-export const RPC_URL = DEVNET_RPC_URL;
+export const RPC_URL = LOCALNET_RPC_URL;
 
 
 

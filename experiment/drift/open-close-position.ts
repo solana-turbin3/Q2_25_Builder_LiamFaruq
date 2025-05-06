@@ -39,6 +39,9 @@ async function main() {
 
   const mintPubkey = SpotMarkets["devnet"][0].mint
 
+  driftClient.getUpdateFundingRateIx()
+
+
   const faucet = new TokenFaucet(
     connection,
     wallet,

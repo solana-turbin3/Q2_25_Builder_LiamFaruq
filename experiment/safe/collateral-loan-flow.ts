@@ -45,6 +45,8 @@ import { sendAll } from "./util";
     debug: true,
   };
 
+
+  // create reserve
   /* ---------------- 1. deposit 5 SOL collateral ---------------- */
   const deposit = await SolendAction.buildDepositTxns(
     pool,

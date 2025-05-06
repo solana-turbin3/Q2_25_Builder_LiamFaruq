@@ -4,7 +4,7 @@ import {
   JUPITER_PERPETUALS_PROGRAM,
   RPC_CONNECTION,
 } from "../constants";
-import { type Perpetuals } from "../idl/jupiter-perpetuals-idl";
+import { type Perpetuals } from "../../idl/jupiter-perpetuals-idl";
 import { PublicKey } from "@solana/web3.js";
 
 type AnchorIdlEvent<EventName extends keyof IdlEvents<Perpetuals>> = {

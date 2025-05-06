@@ -1,6 +1,6 @@
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { AnchorProvider, BN, Program, Wallet } from "@coral-xyz/anchor";
-import { IDL as DovesIDL } from "../idl/doves-idl";
+import { IDL as DovesIDL } from "../../idl/doves-idl";
 import { CUSTODY_PUBKEY } from "../constants";
 import { BNToUSDRepresentation } from "../utils";
 
