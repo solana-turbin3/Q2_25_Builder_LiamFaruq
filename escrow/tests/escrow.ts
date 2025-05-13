@@ -127,69 +127,69 @@ describe("escrow", () => {
       spl.TOKEN_PROGRAM_ID
     );
 
-    // // Execute make instruction
-    // await program.methods
-    //   .make(SEED, DEPOSIT_AMOUNT, RECEIVE_AMOUNT, bump)
-    //   .accountsPartial({
-    //     maker: maker.publicKey,
-    //     mintA,
-    //     mintB,
-    //     makerAtaA: makerAtaA,
-    //     escrow: escrowPDA,
-    //     vault: vault,
-    //     associatedTokenProgram: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-    //     tokenProgram: spl.TOKEN_PROGRAM_ID,
-    //     systemProgram: anchor.web3.SystemProgram.programId,
-    //   })
-    //   .signers([maker])
-    //   .rpc();
+    // Execute make instruction
+    await program.methods
+      .make(SEED, DEPOSIT_AMOUNT, RECEIVE_AMOUNT, bump)
+      .accountsPartial({
+        maker: maker.publicKey,
+        mintA,
+        mintB,
+        makerAtaA: makerAtaA,
+        escrow: escrowPDA,
+        vault: vault,
+        associatedTokenProgram: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: spl.TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .signers([maker])
+      .rpc();
 
-    // // Verify escrow creation
-    // const escrowAccount = await program.account.escrow.fetch(escrowPDA);
-    // assert.isTrue(escrowAccount.maker.equals(maker.publicKey));
-    // assert.equal(escrowAccount.recieve.toNumber(), RECEIVE_AMOUNT.toNumber());
+    // Verify escrow creation
+    const escrowAccount = await program.account.escrow.fetch(escrowPDA);
+    assert.isTrue(escrowAccount.maker.equals(maker.publicKey));
+    assert.equal(escrowAccount.receiveAmount.toNumber(), RECEIVE_AMOUNT.toNumber());
 
-    // // Verify vault deposit
-    // const vaultBalance = await spl.getAccount(provider.connection, vault);
-    // assert.equal(vaultBalance.amount.toString(), DEPOSIT_AMOUNT.toNumber().toString());
+    // Verify vault deposit
+    const vaultBalance = await spl.getAccount(provider.connection, vault);
+    assert.equal(vaultBalance.amount.toString(), DEPOSIT_AMOUNT.toNumber().toString());
 
-    // // Execute take instruction
-    // await program.methods
-    //   .take(RECEIVE_AMOUNT)
-    //   .accountsStrict({
-    //     taker: taker.publicKey,
-    //     maker: maker.publicKey,
-    //     mintA,
-    //     mintB,
-    //     takerAtaA: takerAtaA,
-    //     takerAtaB: takerAtaB,
-    //     makerAtaB: makerAtaB,
-    //     escrow: escrowPDA,
-    //     vault: vault,
-    //     associatedTokenProgram: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-    //     tokenProgram: spl.TOKEN_PROGRAM_ID,
-    //     systemProgram: anchor.web3.SystemProgram.programId,
-    //   })
-    //   .signers([taker, maker])
-    //   .rpc();
+    // Execute take instruction
+    await program.methods
+      .take(RECEIVE_AMOUNT)
+      .accountsStrict({
+        taker: taker.publicKey,
+        maker: maker.publicKey,
+        mintA,
+        mintB,
+        takerAtaA: takerAtaA,
+        takerAtaB: takerAtaB,
+        makerAtaB: makerAtaB,
+        escrow: escrowPDA,
+        vault: vault,
+        associatedTokenProgram: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: spl.TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .signers([taker, maker])
+      .rpc();
 
-    // // Verify balances after take
-    // const takerAtaBBalance = await spl.getAccount(provider.connection, takerAtaB);
-    // assert.equal(takerAtaBBalance.amount.toString(), (10 ** DECIMALS - RECEIVE_AMOUNT.toNumber()).toString());
+    // Verify balances after take
+    const takerAtaBBalance = await spl.getAccount(provider.connection, takerAtaB);
+    assert.equal(takerAtaBBalance.amount.toString(), (10 ** DECIMALS - RECEIVE_AMOUNT.toNumber()).toString());
 
-    // const makerAtaBBalance = await spl.getAccount(provider.connection, makerAtaB);
-    // assert.equal(makerAtaBBalance.amount.toString(), RECEIVE_AMOUNT.toNumber().toString());
+    const makerAtaBBalance = await spl.getAccount(provider.connection, makerAtaB);
+    assert.equal(makerAtaBBalance.amount.toString(), RECEIVE_AMOUNT.toNumber().toString());
 
-    // const takerAtaABalance = await spl.getAccount(provider.connection, takerAtaA);
-    // assert.equal(takerAtaABalance.amount.toString(), DEPOSIT_AMOUNT.toNumber().toString());
+    const takerAtaABalance = await spl.getAccount(provider.connection, takerAtaA);
+    assert.equal(takerAtaABalance.amount.toString(), DEPOSIT_AMOUNT.toNumber().toString());
 
-    // // Verify vault closure
-    // try {
-    //   await spl.getAccount(provider.connection, vault);
-    //   assert.fail("Vault should be closed");
-    // } catch (err) {
-    //   assert.include(err.message, "Account does not exist");
-    // }
+    // Verify vault closure
+    try {
+      await spl.getAccount(provider.connection, vault);
+      assert.fail("Vault should be closed");
+    } catch (err) {
+      assert.include(err.message, "Account does not exist");
+    }
   });
 
   it("should allow refund", async () => {
